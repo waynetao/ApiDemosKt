@@ -17,8 +17,10 @@
 package com.example.android.apis
 
 import android.content.Intent
+import android.os.Build
 import android.os.Bundle
 import android.view.View
+import android.view.WindowInsetsController
 import android.widget.ListView
 import android.widget.SimpleAdapter
 import androidx.appcompat.app.AppCompatActivity
@@ -62,6 +64,7 @@ open class ApiDemos : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.api_demos)
         listView = findViewById(R.id.list)
+        setLightStatusBar(true)
 
         val intent = intent
         var path = intent.getStringExtra("com.example.android.apis.Path")
@@ -79,6 +82,28 @@ open class ApiDemos : AppCompatActivity() {
         }
     }
 
+    fun setLightStatusBar(isLight: Boolean) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            // Android 11 及以上
+            val insetsController = window.insetsController
+            if (insetsController != null) {
+                val appearance = if (isLight) {
+                    WindowInsetsController.APPEARANCE_LIGHT_STATUS_BARS
+                } else {
+                    0 // 恢复浅色字体
+                }
+                insetsController.setSystemBarsAppearance(appearance, WindowInsetsController.APPEARANCE_LIGHT_STATUS_BARS)
+            }
+        } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            // Android 6.0 到 Android 10
+            window.decorView.systemUiVisibility = if (isLight) {
+                View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR // 深色文字
+            } else {
+                0 // 恢复浅色字体
+            }
+        }
+        // 对于 Android 6.0 以下，不支持状态栏文字设置，保持默认样式
+    }
     /**
      * Queries a `PackageManager` to retrieve a `List<ResolveInfo>` for all the activities
      * in our manifest which have action ACTION_MAIN, and category CATEGORY_SAMPLE_CODE. If then goes
